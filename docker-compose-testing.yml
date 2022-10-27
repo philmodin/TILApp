@@ -1,0 +1,17 @@
+services:
+    til-app:
+        depends_on:
+            - postgres
+        build:
+            context: .
+            dockerfile: testing.Dockerfile
+        platform: linux/amd64
+        environment:
+            - DATABSE_HOST=postgres
+            - DATABSE_HOST=5432
+    postgres:
+        image: "postgres"
+        environment:
+            - POSTGRES_DB=vapor-test
+            - POSTGRES_USER=vapor_username
+            - POSTGRES_PASSWORD=vapor_password

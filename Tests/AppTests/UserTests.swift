@@ -73,4 +73,27 @@ final class UserTests: XCTestCase {
             XCTAssertEqual(recievedUser.id, user.id)
         })
     }
+    
+    func testGettingAUsersAcronymsFromTheAPI() throws {
+        let user = try User.create(on: app.db)
+        let acronymShort = "LOL"
+        let acronymLong = "Laughing Out Loud"
+        
+        let acronym1 = try Acronym.create(
+            short: acronymShort,
+            long: acronymLong,
+            user: user,
+            on: app.db
+        )
+        
+        _ = try Acronym.create(short: "ROFL", long: "copter", user: user, on: app.db)
+        
+        try app.test(.GET, "\(usersURI)\(user.id!)/acronyms", afterResponse: { response in
+            let acronyms = try response.content.decode([Acronym].self)
+            XCTAssertEqual(acronyms.count, 2)
+            XCTAssertEqual(acronyms[0].id, acronym1.id)
+            XCTAssertEqual(acronyms[0].short, acronymShort)
+            XCTAssertEqual(acronyms[0].long, acronymLong)
+        })
+    }
 }
