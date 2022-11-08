@@ -12,7 +12,6 @@ struct AcronymsController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let acronymsRoutes = routes.grouped("api", "acronyms")
         acronymsRoutes.get(use: getAllHandler)
-        acronymsRoutes.post(use: createHandler)
         acronymsRoutes.get(":acronymID", use: getHandler)
         acronymsRoutes.put(":acronymID", use: updateHandler)
         acronymsRoutes.delete(":acronymID", use: deleteHandler)
@@ -23,6 +22,10 @@ struct AcronymsController: RouteCollection {
         acronymsRoutes.post(":acronymID", "categories", ":categoryID", use: addCategoriesHandler)
         acronymsRoutes.get(":acronymID", "categories", use: getCategoriesHandler)
         acronymsRoutes.delete(":acronymID", "categories", ":categoryID", use: removeCategoriesHandler)
+		let basicAuthMiddleware = User.authenticator()
+		let guardAuthMiddleware = User.guardMiddleware()
+		let protected = acronymsRoutes.grouped(basicAuthMiddleware, guardAuthMiddleware)
+		protected.post(use: createHandler)
     }
     
     func createHandler(_ req: Request) throws -> EventLoopFuture<Acronym> {
