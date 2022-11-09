@@ -10,10 +10,16 @@ import Vapor
 struct UsersController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let usersRoute = routes.grouped("api", "users")
-        usersRoute.post(use: createHandler)
         usersRoute.get(use: getAllHandler)
         usersRoute.get(":userID", use: getHandler)
         usersRoute.get(":userID", "acronyms", use: getAcronymsHandler)
+		let basicAuthMiddleware = User.authenticator()
+		let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
+		basicAuthGroup.post("login", use: loginHandler)
+		let tokenAuthMiddleware = Token.authenticator()
+		let guardAuthMiddleware = User.guardMiddleware()
+		let tokenAuthGroup = usersRoute.grouped(tokenAuthMiddleware, guardAuthMiddleware)
+		tokenAuthGroup.post(use: createHandler)
     }
     
 	func createHandler(_ req: Request) throws -> EventLoopFuture<User.Public> {
@@ -39,4 +45,10 @@ struct UsersController: RouteCollection {
                 user.$acronyms.get(on: req.db)
             }
     }
+	
+	func loginHandler(_ req: Request) throws -> EventLoopFuture<Token> {
+		let user = try req.auth.require(User.self)
+		let token = try Token.generate(for: user)
+		return token.save(on: req.db).map { token }
+	}
 }
