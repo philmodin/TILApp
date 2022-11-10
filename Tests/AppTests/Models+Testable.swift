@@ -7,14 +7,18 @@
 
 @testable import App
 import Fluent
+import Vapor
 
 extension User {
-    static func create(
-        name: String = "Luke",
-        username: String = "lukes",
-        on databse: Database
-    ) throws -> User {
-		let user = User(name: name, username: username, password: "password")
+    static func create(name: String = "Luke", username: String? = nil, on databse: Database) throws -> User {
+		let createUsername: String
+		if let suppliedUsername = username {
+			createUsername = suppliedUsername
+		} else {
+			createUsername = UUID().uuidString
+		}
+		let password = try Bcrypt.hash("password")
+		let user = User(name: name, username: createUsername, password: password)
         try user.save(on: databse).wait()
         return user
     }
