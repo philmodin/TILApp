@@ -1,6 +1,7 @@
 import Fluent
 import FluentPostgresDriver
 import Vapor
+import SendGrid
 
 // configures your application
 public func configure(_ app: Application) throws {
@@ -44,4 +45,5 @@ public func configure(_ app: Application) throws {
 
     // register routes
     try routes(app)
+	app.sendgrid.initialize()
 }

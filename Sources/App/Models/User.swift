@@ -22,6 +22,9 @@ final class User: Model, Content {
     
     @Field(key: "username")
     var username: String
+	
+	@Field(key: "email")
+	var email: String
     
     @Children(for: \.$user)
     var acronyms: [Acronym]
@@ -32,11 +35,13 @@ final class User: Model, Content {
 		id: UUID? = nil,
 		name: String,
 		username: String,
-		password: String
+		password: String,
+		email: String
 	) {
         self.name = name
         self.username = username
 		self.password = password
+		self.email = email
     }
 	
 	final class Public: Content {
